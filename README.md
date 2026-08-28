@@ -16,6 +16,50 @@
 
 ---
 
+## 💡 What Is This About?
+
+**NeuroDetox AI** is an autonomous, privacy-first cognitive attention shield designed for **Problem Statement 30: Smart Notification Manager** under the **Digital Detox & Well-Being** category.
+
+### 🔴 The Problem
+Modern smartphone users and students receive **over 80 to 120 notifications daily** from social media apps, promotional clearance sales, group chats, and app alerts. This continuous stream of low-priority interruptions causes severe attention fragmentation, breaks deep study states, and increases cognitive fatigue.
+
+### 🟢 The Solution
+**NeuroDetox AI** acts as an intelligent firewall between incoming notifications and human attention:
+1. **⚡ Local NLP Triage (Sub-2ms):** Evaluates every notification in real time across semantic intent, category urgency, and sender historical affinity without sending private user data to external cloud LLMs.
+2. **🛡️ Focus Shield & Digest Batching:** Suppresses low-value distractions (ads, likes, promotional bait) during study and deep work hours, batching them into structured quiet digests.
+3. **🚨 Emergency Bypass Guarantee:** Ensures high-priority alerts (exam schedule changes, security warnings, server outages) reach you immediately.
+4. **🧠 Online Reinforcement Learning:** Learns your personal preferences in real time whenever you **Open (✓)**, **Dismiss (✗)**, or **Snooze (⏰)** an alert, dynamically tuning future priority weights.
+
+---
+
+## 🎯 How To Use It
+
+### Quick 3-Minute Walkthrough:
+
+1. **🌐 Open the App & Explore the Console:**
+   - Launch `http://localhost:5173` (or visit the [Live Demo](https://neuroai-black.vercel.app/)).
+   - Click the **"Guide & Info"** tab or **"Home"** to view the interactive AI sandbox.
+
+2. **📊 Check Digital Detox Metrics:**
+   - Switch to **"Dashboard"** to view the live Digital Detox Index, noise deflection rate (%), and alert distribution.
+
+3. **🔔 Inspect Live Notifications & Explainable AI (XAI):**
+   - Click **"Live Feed"** to view notifications prioritized into **Critical**, **High**, **Medium**, and **Low**.
+   - Click **"Explain AI Score"** on any notification card to open the XAI drawer showing the exact math formula, intent delta ($\Delta_{\text{intent}}$), and category weights ($W_{\text{cat}}$).
+
+4. **🧠 Train the Reinforcement Learning Engine:**
+   - Click **Open (✓)** on work/study notifications to boost sender affinity (+1.0).
+   - Click **Dismiss (✗)** on marketing spam to penalize future sender priority (-1.0).
+   - Check **"AI Insights"** $\rightarrow$ **"Learned Sender Weights"** to observe real-time model updates.
+
+5. **🛡️ Activate Focus Shield & Study Hours:**
+   - Navigate to **"Focus Shield"**, enable **Focus Mode ON**, set your active study window (e.g. `09:00` - `18:00`), and click **Save Settings**. Low-priority alerts will now be automatically batched into quiet digests.
+
+6. **🧪 Simulate & Stream Real-Time Alerts:**
+   - Open **"Simulate & Stream"** and click **`▶ Start Live Stream`** to watch continuous mock alerts flow over WebSockets and get triaged live by the AI engine!
+
+---
+
 ## 🏛️ System Architecture
 
 <img width="1472" height="2032" alt="image" src="https://github.com/user-attachments/assets/5239e45a-f06a-4142-84b0-a1392cf46ab8" />

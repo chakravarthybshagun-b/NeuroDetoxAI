@@ -8,11 +8,12 @@ import SimulatePanel from "./components/SimulatePanel";
 import { api, WS_URL } from "./api";
 import {
   Brain, Bell, BarChart2, Settings, FlaskConical, RefreshCw,
-  Sparkles, Wifi, WifiOff, Home
+  Sparkles, Wifi, WifiOff, Home, HelpCircle
 } from "lucide-react";
 
 const TABS = [
   { id: "landing",     label: "Home",             icon: Home },
+  { id: "guide",       label: "Guide & Info",     icon: HelpCircle },
   { id: "dashboard",   label: "Dashboard",        icon: Brain },
   { id: "feed",        label: "Live Feed",        icon: Bell },
   { id: "insights",    label: "AI Insights",      icon: BarChart2 },
@@ -355,7 +356,7 @@ export default function App() {
           </div>
         )}
 
-        {tab === "landing"    && <LandingPage onLaunchApp={() => setTab("dashboard")} />}
+        {(tab === "landing" || tab === "guide") && <LandingPage onLaunchApp={() => setTab("dashboard")} />}
         {tab === "dashboard"  && <Dashboard stats={stats} isStreaming={isStreaming} />}
 
         {tab === "feed"       && <NotificationFeed notifications={notifications} onRefresh={refreshAll} />}
