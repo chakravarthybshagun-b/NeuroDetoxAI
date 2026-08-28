@@ -1,27 +1,36 @@
 """
-Vercel Serverless Function - FastAPI Backend
-Simplified version with fallback
+Vercel Serverless Function - FastAPI Backend Gateway
 """
 import sys
 import os
 from pathlib import Path
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-# Add backend directory to path  
+# Add backend directory to sys.path
 backend_path = str(Path(__file__).parent.parent / "backend")
 if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
 
 try:
-    # Try to import the actual FastAPI app
-    print(f"Attempting to import from: {backend_path}")
-    from main import app
-    print("Successfully imported FastAPI app from backend/main.py")
+    from main import app as backend_app
     
-except ImportError as e:
-    print(f"Failed to import backend: {e}")
-    # Fallback: Create minimal API
-    from fastapi import FastAPI
-    from fastapi.middleware.cors import CORSMiddleware
+    app = FastAPI(title="NeuroDetox AI API Gateway")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    
+    # Mount backend app for both /api subpath and root requests
+    app.mount("/api", backend_app)
+    app.mount("/", backend_app)
+    
+except Exception as e:
+    import traceback
+    traceback.print_exc()
     
     app = FastAPI()
     app.add_middleware(
@@ -32,25 +41,11 @@ except ImportError as e:
         allow_headers=["*"],
     )
     
-    @app.get("/")
-    def root():
-        return {"status": "Backend API (fallback mode)", "message": "Backend import failed"}
-    
     @app.get("/health")
+    @app.get("/api/health")
     def health():
-        return {"status": "healthy", "mode": "fallback"}
+        return {"status": "healthy", "mode": "fallback", "error": str(e)}
 
-except Exception as e:
-    print(f"Unexpected error: {e}")
-    import traceback
-    traceback.print_exc()
-    
-    from fastapi import FastAPI
-    app = FastAPI()
-    
-    @app.get("/health")
-    def health():
-        return {"status": "error", "error": str(e)}
 
 
 
