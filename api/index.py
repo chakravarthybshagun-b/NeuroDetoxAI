@@ -7,10 +7,13 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Add backend directory to sys.path
-backend_path = str(Path(__file__).parent.parent / "backend")
-if backend_path not in sys.path:
-    sys.path.insert(0, backend_path)
+# Try both api/backend directory and root backend directory
+api_backend = str(Path(__file__).parent / "backend")
+root_backend = str(Path(__file__).parent.parent / "backend")
+
+for b_path in [api_backend, root_backend]:
+    if os.path.exists(b_path) and b_path not in sys.path:
+        sys.path.insert(0, b_path)
 
 try:
     from main import app as backend_app
@@ -44,8 +47,4 @@ except Exception as e:
     @app.get("/health")
     @app.get("/api/health")
     def health():
-        return {"status": "healthy", "mode": "fallback", "error": str(e)}
-
-
-
-
+        return {"status": "error", "message": "Failed to load FastAPI backend", "error": str(e)}
