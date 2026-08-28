@@ -1,5 +1,5 @@
 # 🧠 NeuroDetox AI — Smart Cognitive Attention Shield
-> **🌐 Live Demo:** [https://neuroai-black.vercel.app/](https://neuroai-black.vercel.app/)  
+> **🌐 Live Demo:** [https://neuroai-black.vercel.app/](https://neuro-detox-ai.vercel.app/)  
 > **Track / Category:** Digital Detox & Well-Being  
 > **Problem Statement ID:** 30 | SMART NOTIFICATION MANAGER  
 > **Tagline:** An AI-powered cognitive attention shield that learns your study habits, prioritizes critical alerts, and batches distractions in real time.
@@ -7,7 +7,7 @@
 ---
 
 ## 🌟 Highlights & Winning Features
-- 🌐 **Live Online Demo:** [https://neuroai-black.vercel.app/](https://neuroai-black.vercel.app/)
+- 🌐 **Live Online Demo:** [https://neuroai-black.vercel.app/](https://neuro-detox-ai.vercel.app/)
 - 🚀 **Futuristic Cyberpunk Web Dashboard** with real-time WebSocket communication.
 - 🧠 **Multi-Stage Semantic NLP & Reinforcement Engine** (Sub-2ms latency, 100% offline, privacy-first).
 - 🛡️ **Autonomous Focus Shield** with smart digest batching.
