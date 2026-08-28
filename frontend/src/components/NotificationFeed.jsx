@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CheckCheck, X, Clock, User, ChevronDown, ChevronUp, Sparkles, Tag } from "lucide-react";
+import { CheckCheck, X, Clock, User, ChevronDown, ChevronUp, Sparkles, RefreshCw } from "lucide-react";
 import { api } from "../api";
 
 const LABELS = {
@@ -14,7 +14,9 @@ const EMOJI = {
 };
 
 function timeAgo(iso) {
+  if (!iso) return "just now";
   const diff = Date.now() - new Date(iso).getTime();
+  if (isNaN(diff)) return "recently";
   const s = Math.floor(diff / 1000);
   if (s < 10) return "just now";
   if (s < 60) return `${s}s ago`;
@@ -25,7 +27,9 @@ function timeAgo(iso) {
 
 function NotificationItem({ n, onAction }) {
   const [showReasoning, setShowReasoning] = useState(false);
-  const isActionable = ["delivered", "pending", "batched"].includes(n.status);
+  const status = n?.status || "pending";
+  const isActionable = ["delivered", "pending", "batched"].includes(status);
+  const priorityLabel = n?.priority_label || "medium";
 
   return (
     <div
@@ -33,12 +37,12 @@ function NotificationItem({ n, onAction }) {
       style={{
         marginBottom: 10,
         borderLeft: `4px solid ${
-          n.priority_label === "critical" ? "var(--critical)"
-          : n.priority_label === "high"   ? "var(--high)"
-          : n.priority_label === "medium" ? "var(--medium)"
+          priorityLabel === "critical" ? "var(--critical)"
+          : priorityLabel === "high"   ? "var(--high)"
+          : priorityLabel === "medium" ? "var(--medium)"
           : "var(--low)"
         }`,
-        opacity: ["dismissed", "opened", "snoozed"].includes(n.status) ? 0.55 : 1,
+        opacity: ["dismissed", "opened", "snoozed"].includes(status) ? 0.55 : 1,
         transition: "all 0.3s ease",
       }}
     >
@@ -46,37 +50,37 @@ function NotificationItem({ n, onAction }) {
         {/* Left Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{n.title}</span>
-            <span className={LABELS[n.priority_label] || "badge"}>{n.priority_label}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text)" }}>{n?.title || "Notification"}</span>
+            <span className={LABELS[priorityLabel] || "badge"}>{priorityLabel}</span>
             <span style={{ fontSize: 11, fontWeight: 600, color: "var(--muted)" }}>
-              Score: <strong style={{ color: "var(--text)" }}>{n.priority_score}</strong>/100
+              Score: <strong style={{ color: "var(--text)" }}>{n?.priority_score ?? 50}</strong>/100
             </span>
           </div>
 
-          <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 8, lineHeight: 1.4 }}>{n.body}</p>
+          <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 8, lineHeight: 1.4 }}>{n?.body}</p>
 
           <div style={{ display: "flex", gap: 12, fontSize: 11, color: "var(--muted)", flexWrap: "wrap", alignItems: "center" }}>
             <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <User size={11} /> {n.sender}
+              <User size={11} /> {n?.sender || "Unknown"}
             </span>
-            <span>{EMOJI[n.category]} {n.category}</span>
-            <span>{timeAgo(n.timestamp)}</span>
+            <span>{EMOJI[n?.category] || "🔔"} {n?.category || "general"}</span>
+            <span>{timeAgo(n?.timestamp)}</span>
             
-            {n.status === "batched" && (
+            {status === "batched" && (
               <span style={{ color: "var(--medium)", background: "rgba(255,230,109,0.1)", padding: "1px 8px", borderRadius: 10, fontWeight: 600 }}>
                 ⏳ Batched for Focus Protection
               </span>
             )}
 
             {/* Explain AI Button */}
-            {n.ai_reasoning && (
+            {n?.ai_reasoning && (
               <button
                 onClick={() => setShowReasoning(!showReasoning)}
                 style={{
-                  background: "rgba(108,99,255,0.12)",
-                  border: "1px solid rgba(108,99,255,0.3)",
+                  background: "rgba(99,102,241,0.12)",
+                  border: "1px solid rgba(99,102,241,0.3)",
                   borderRadius: 12,
-                  color: "var(--accent)",
+                  color: "var(--cyan)",
                   fontSize: 11,
                   fontWeight: 600,
                   cursor: "pointer",
@@ -94,7 +98,7 @@ function NotificationItem({ n, onAction }) {
           </div>
 
           {/* AI Reasoning Drawer */}
-          {showReasoning && n.ai_reasoning && (
+          {showReasoning && n?.ai_reasoning && (
             <div
               style={{
                 marginTop: 10,
@@ -105,7 +109,7 @@ function NotificationItem({ n, onAction }) {
                 fontSize: 11,
               }}
             >
-              <div style={{ fontWeight: 600, color: "var(--accent)", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
+              <div style={{ fontWeight: 600, color: "var(--cyan)", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
                 <Sparkles size={12} /> AI Scoring Breakdown:
               </div>
               <div style={{ color: "var(--text)", marginBottom: 6 }}>
@@ -152,7 +156,7 @@ function NotificationItem({ n, onAction }) {
         )}
         {!isActionable && (
           <span style={{ fontSize: 11, color: "var(--muted)", textTransform: "capitalize", padding: "4px 8px", background: "var(--surface2)", borderRadius: 6 }}>
-            {n.status}
+            {status}
           </span>
         )}
       </div>
@@ -160,20 +164,49 @@ function NotificationItem({ n, onAction }) {
   );
 }
 
-export default function NotificationFeed({ notifications, onRefresh }) {
+export default function NotificationFeed({ notifications = [], onRefresh }) {
+  const [seeding, setSeeding] = useState(false);
+
   const handleAction = async (id, action) => {
-    await api.doAction(id, action);
-    onRefresh();
+    try {
+      await api.doAction(id, action);
+      if (onRefresh) onRefresh();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
-  if (!notifications || notifications.length === 0) {
+  const handleSeedData = async () => {
+    setSeeding(true);
+    try {
+      await api.simulate(4);
+      if (onRefresh) onRefresh();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  const safeNotifications = Array.isArray(notifications) ? notifications : [];
+
+  if (safeNotifications.length === 0) {
     return (
       <div className="card" style={{ textAlign: "center", color: "var(--muted)", padding: 48 }}>
         <div style={{ fontSize: 32, marginBottom: 10 }}>🔔</div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: "var(--text)" }}>Feed is quiet</div>
-        <p style={{ fontSize: 12, marginTop: 4 }}>
-          No incoming notifications yet. Head to the <strong>Simulate</strong> tab to send sample notifications or toggle the Real-Time Live Stream!
+        <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text)" }}>Feed is quiet</div>
+        <p style={{ fontSize: 13, marginTop: 4, marginBottom: 16, color: "var(--muted)" }}>
+          No notifications in memory. Click below to generate sample AI-prioritized notifications instantly!
         </p>
+        <button
+          className="btn btn-primary"
+          onClick={handleSeedData}
+          disabled={seeding}
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, margin: "0 auto" }}
+        >
+          <Sparkles size={14} />
+          {seeding ? "Generating Notifications..." : "⚡ Generate Sample Notifications"}
+        </button>
       </div>
     );
   }
@@ -185,12 +218,12 @@ export default function NotificationFeed({ notifications, onRefresh }) {
           🔔 Live Notification Stream
         </h2>
         <span style={{ fontSize: 12, color: "var(--muted)" }}>
-          {notifications.length} total notifications
+          {safeNotifications.length} total notifications
         </span>
       </div>
       <div style={{ maxHeight: 560, overflowY: "auto", paddingRight: 4 }}>
-        {notifications.map((n) => (
-          <NotificationItem key={n.id} n={n} onAction={handleAction} />
+        {safeNotifications.map((n) => (
+          <NotificationItem key={n.id || Math.random()} n={n} onAction={handleAction} />
         ))}
       </div>
     </div>

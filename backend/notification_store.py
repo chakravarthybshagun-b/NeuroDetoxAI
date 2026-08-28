@@ -38,6 +38,77 @@ def _load_from_disk():
             _notifications = []
             _sender_weights = {}
 
+    if not _notifications:
+        _seed_initial_data()
+
+
+def _seed_initial_data():
+    global _notifications, _sender_weights
+    _sender_weights = {"Datadog": 0.25, "AWS Security": 0.30, "ShopNow": -0.40, "Instagram": -0.20}
+    samples = [
+        {
+            "title": "CRITICAL: Database connection pool exhausted",
+            "body": "Auth microservice latency > 4000ms. Immediate action required.",
+            "sender": "Datadog",
+            "category": "work",
+            "app": "Datadog",
+            "priority_score": 95.0,
+            "priority_label": "critical",
+            "status": "delivered",
+        },
+        {
+            "title": "Security Alert: Unauthorized login attempt",
+            "body": "New login from unrecognized IP: 185.220.101.5. Check now.",
+            "sender": "AWS Security",
+            "category": "system",
+            "app": "AWS",
+            "priority_score": 92.0,
+            "priority_label": "critical",
+            "status": "delivered",
+        },
+        {
+            "title": "Sprint Review meeting in 10 minutes",
+            "body": "Google Meet link is live: meet.google.com/xyz-abc",
+            "sender": "Google Calendar",
+            "category": "work",
+            "app": "Calendar",
+            "priority_score": 78.0,
+            "priority_label": "high",
+            "status": "delivered",
+        },
+        {
+            "title": "Doctor appointment reminder",
+            "body": "Your dental checkup is scheduled tomorrow at 3:00 PM.",
+            "sender": "HealthApp",
+            "category": "personal",
+            "app": "Health",
+            "priority_score": 62.0,
+            "priority_label": "medium",
+            "status": "batched",
+        },
+        {
+            "title": "50% OFF Flash Sale ends in 2 hours!",
+            "body": "Exclusive discounts on noise-cancelling headphones. Buy now!",
+            "sender": "ShopNow",
+            "category": "ads",
+            "app": "ShopNow",
+            "priority_score": 15.0,
+            "priority_label": "low",
+            "status": "dismissed",
+        },
+        {
+            "title": "Alex liked your photo",
+            "body": "Alex and 18 others reacted to your story.",
+            "sender": "Instagram",
+            "category": "social",
+            "app": "Instagram",
+            "priority_score": 25.0,
+            "priority_label": "low",
+            "status": "batched",
+        },
+    ]
+    _notifications = [Notification(**s) for s in samples]
+
 
 def _save_to_disk():
     try:
