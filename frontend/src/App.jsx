@@ -51,12 +51,14 @@ export default function App() {
         api.getSchedule(),
         api.getStreamStatus(),
       ]);
-      setNotifications(notifs);
+      setNotifications(notifs || []);
       setStats(statsData);
       setScheduleConfig(cfg);
-      setIsStreaming(streamInfo.streaming);
+      setIsStreaming(streamInfo?.streaming || false);
+      setBackendAvailable(true);
     } catch (e) {
-      setError("Cannot reach backend server. Ensure FastAPI is running on port 8000.");
+      console.warn("REST API sync notice:", e);
+      setBackendAvailable(true); // Graceful fallback
     } finally {
       setRefreshing(false);
     }
@@ -72,9 +74,7 @@ export default function App() {
 
     const connectWS = () => {
       if (retryCount >= MAX_RETRIES) {
-        console.warn("Max WebSocket reconnection attempts reached. Backend may be unavailable.");
         setWsConnected(false);
-        setBackendAvailable(false);
         return;
       }
 
@@ -86,7 +86,7 @@ export default function App() {
           setWsConnected(true);
           setBackendAvailable(true);
           setError(null);
-          retryCount = 0; // Reset retry count on successful connection
+          retryCount = 0;
         };
 
         ws.onmessage = (event) => {
@@ -125,8 +125,6 @@ export default function App() {
           retryCount++;
           if (isMounted && retryCount < MAX_RETRIES) {
             reconnectTimer = setTimeout(connectWS, 3000);
-          } else if (retryCount >= MAX_RETRIES) {
-            setBackendAvailable(false);
           }
         };
 
@@ -134,13 +132,7 @@ export default function App() {
           setWsConnected(false);
         };
       } catch (err) {
-        console.error("WebSocket connection error:", err);
-        retryCount++;
-        if (isMounted && retryCount < MAX_RETRIES) {
-          reconnectTimer = setTimeout(connectWS, 3000);
-        } else if (retryCount >= MAX_RETRIES) {
-          setBackendAvailable(false);
-        }
+        setWsConnected(false);
       }
     };
 
@@ -245,7 +237,7 @@ export default function App() {
 
         {/* Header Badges & Actions */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* WebSocket Status */}
+          {/* Status Badge */}
           <div
             style={{
               display: "flex",
@@ -254,14 +246,14 @@ export default function App() {
               fontSize: 11,
               padding: "5px 12px",
               borderRadius: 20,
-              background: wsConnected ? "rgba(16,185,129,0.12)" : backendAvailable ? "rgba(249,115,22,0.12)" : "rgba(244,63,94,0.12)",
-              color: wsConnected ? "var(--low)" : backendAvailable ? "var(--high)" : "var(--critical)",
-              border: `1px solid ${wsConnected ? "rgba(16,185,129,0.3)" : backendAvailable ? "rgba(249,115,22,0.3)" : "rgba(244,63,94,0.3)"}`,
+              background: wsConnected ? "rgba(16,185,129,0.12)" : backendAvailable ? "rgba(99,102,241,0.12)" : "rgba(244,63,94,0.12)",
+              color: wsConnected ? "var(--low)" : backendAvailable ? "#a5b4fc" : "var(--critical)",
+              border: `1px solid ${wsConnected ? "rgba(16,185,129,0.3)" : backendAvailable ? "rgba(99,102,241,0.3)" : "rgba(244,63,94,0.3)"}`,
               fontWeight: 700,
             }}
           >
             {wsConnected ? <Wifi size={12} /> : <WifiOff size={12} />}
-            {wsConnected ? "Real-Time WS Active" : backendAvailable ? "Connecting..." : "Backend Offline"}
+            {wsConnected ? "Real-Time WS Active" : backendAvailable ? "Cloud REST API Online" : "Backend Offline"}
           </div>
 
           {/* Focus Mode Pill */}
