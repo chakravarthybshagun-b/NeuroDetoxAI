@@ -1,7 +1,11 @@
 import axios from "axios";
 
-const BASE = "http://localhost:8000";
-export const WS_URL = "ws://localhost:8000/ws";
+// Use environment variable for API URL, fallback to localhost for development
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const BASE = API_URL;
+const protocol = API_URL.startsWith("https") ? "wss" : "ws";
+const wsHost = API_URL.replace(/^https?:\/\//, "");
+export const WS_URL = `${protocol}://${wsHost}/ws`;
 
 export const api = {
   // Notifications

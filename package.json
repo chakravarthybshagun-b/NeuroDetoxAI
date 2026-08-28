@@ -1,0 +1,14 @@
+{
+  "name": "neuro-detox-ai",
+  "version": "2.0.0",
+  "description": "AI-powered cognitive attention shield - Smart Notification Manager",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"cd backend && uvicorn main:app --reload\" \"cd frontend && npm run dev\"",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && uvicorn main:app --host 0.0.0.0 --port 8000"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
