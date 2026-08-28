@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import LandingPage from "./components/LandingPage";
-import PresentationDeck from "./components/PresentationDeck";
 import Dashboard from "./components/Dashboard";
 import NotificationFeed from "./components/NotificationFeed";
 import ScheduleManager from "./components/ScheduleManager";
@@ -9,7 +8,7 @@ import SimulatePanel from "./components/SimulatePanel";
 import { api, WS_URL } from "./api";
 import {
   Brain, Bell, BarChart2, Settings, FlaskConical, RefreshCw,
-  Award, Sparkles, Wifi, WifiOff, Home
+  Sparkles, Wifi, WifiOff, Home
 } from "lucide-react";
 
 const TABS = [
@@ -19,8 +18,8 @@ const TABS = [
   { id: "insights",    label: "AI Insights",      icon: BarChart2 },
   { id: "schedule",    label: "Focus Shield",     icon: Settings },
   { id: "simulate",    label: "Simulate & Stream",icon: FlaskConical },
-  { id: "deck",        label: "Presentation PPT", icon: Award },
 ];
+
 
 export default function App() {
   const [tab, setTab] = useState("landing");
@@ -334,21 +333,6 @@ export default function App() {
                 {notifications.length}
               </span>
             )}
-            {id === "deck" && (
-              <span
-                style={{
-                  fontSize: 9,
-                  fontWeight: 800,
-                  background: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)",
-                  color: "#fff",
-                  padding: "1px 6px",
-                  borderRadius: 4,
-                  textTransform: "uppercase",
-                }}
-              >
-                Judge PPT
-              </span>
-            )}
           </button>
         ))}
       </nav>
@@ -371,9 +355,9 @@ export default function App() {
           </div>
         )}
 
-        {tab === "landing"    && <LandingPage onLaunchApp={() => setTab("dashboard")} onOpenDeck={() => setTab("deck")} />}
-        {tab === "deck"       && <PresentationDeck onLaunchApp={() => setTab("feed")} />}
+        {tab === "landing"    && <LandingPage onLaunchApp={() => setTab("dashboard")} />}
         {tab === "dashboard"  && <Dashboard stats={stats} isStreaming={isStreaming} />}
+
         {tab === "feed"       && <NotificationFeed notifications={notifications} onRefresh={refreshAll} />}
         {tab === "insights"   && <PatternInsights notifications={notifications} />}
         {tab === "schedule"   && <ScheduleManager config={scheduleConfig} onUpdate={setScheduleConfig} />}

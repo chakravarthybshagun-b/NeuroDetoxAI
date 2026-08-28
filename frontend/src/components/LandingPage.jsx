@@ -4,7 +4,7 @@ import {
   ArrowRight, Flame, Layers, Smartphone, Award, Cpu, ChevronRight
 } from "lucide-react";
 
-export default function LandingPage({ onLaunchApp, onOpenDeck }) {
+export default function LandingPage({ onLaunchApp }) {
   const [testNotification, setTestNotification] = useState("");
   const [simResult, setSimResult] = useState(null);
 
@@ -109,16 +109,8 @@ export default function LandingPage({ onLaunchApp, onOpenDeck }) {
             Launch Live Detox Console
             <ArrowRight size={16} />
           </button>
-          
-          <button
-            className="btn btn-cyber"
-            style={{ padding: "14px 28px", fontSize: 15, borderRadius: 12 }}
-            onClick={onOpenDeck}
-          >
-            <Award size={18} />
-            Open 8-Slide PPT Deck (For Judges)
-          </button>
         </div>
+
 
         {/* Live Interactive Triage Sandbox (Try It Right Here) */}
         <div className="card card-glow-primary" style={{ maxWidth: 860, margin: "0 auto 56px auto", padding: 32 }}>

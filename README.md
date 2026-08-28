@@ -94,10 +94,10 @@ npm run dev
 
 ## 🎮 How to Use  (3-Minute Script)
 
-### Step 1: Open Home & PPT Presentation Mode
+### Step 1: Open the Web Application
 1. Open **`http://localhost:5173`** in your browser.
-2. Click the **"Presentation PPT"** tab to access the 8-slide presentation deck.
-3. Use the **◀ / ▶ Arrow Keys** to flip through slides with speaker notes.
+2. Explore the live interactive sandbox and detox dashboard console.
+
 
 ### Step 2: Start the Real-Time Notification Stream
 1. Click the **"Simulate & Stream"** tab.
@@ -163,14 +163,12 @@ smart-notification-manager/
 │   │   ├── index.css            # Cyberpunk glassmorphic styling system
 │   │   └── components/
 │   │       ├── LandingPage.jsx      # Futuristic landing page with sandbox
-│   │       ├── PresentationDeck.jsx # 8-slide interactive PowerPoint deck
 │   │       ├── Dashboard.jsx        # Digital Wellness Index & focus ring
 │   │       ├── NotificationFeed.jsx # Real-time feed with Explainable AI drawer
 │   │       ├── PatternInsights.jsx  # Recharts visualizations & sender weights
 │   │       ├── ScheduleManager.jsx  # Focus Shield configuration
 │   │       └── SimulatePanel.jsx    # Real-time WebSocket continuous stream simulator
 ├── README.md                    # Project documentation & setup guide
-└── SLIDES.md                    # Complete presentation deck with speaker scripts
 ```
 
 ---
@@ -183,7 +181,7 @@ smart-notification-manager/
 | **Technical Depth** | Multi-stage NLP intent extraction, continuous reinforcement learning feedback loop, asynchronous WebSockets. |
 | **User Experience** | Glassmorphic cyberpunk UI, real-time toast alerts, interactive live stream simulator. |
 | **Explainability** | Full Explainable AI (XAI) feature attribution breakdown on every single alert. |
-| **Presentation Readiness**| Built-in interactive 8-slide PPT presentation deck with speaker notes and judge defense. |
+
 
 ---
 
