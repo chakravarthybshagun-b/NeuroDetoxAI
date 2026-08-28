@@ -1,10 +1,12 @@
 import axios from "axios";
 
-// Use environment variable for API URL, fallback to localhost for development
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Use environment variable or default to current domain
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 const BASE = API_URL;
-const protocol = API_URL.startsWith("https") ? "wss" : "ws";
-const wsHost = API_URL.replace(/^https?:\/\//, "");
+
+// For WebSocket, determine protocol based on current page protocol
+const protocol = typeof window !== 'undefined' ? (window.location.protocol === 'https:' ? 'wss' : 'ws') : 'ws';
+const wsHost = typeof window !== 'undefined' ? window.location.host : 'localhost:8000';
 export const WS_URL = `${protocol}://${wsHost}/ws`;
 
 export const api = {
