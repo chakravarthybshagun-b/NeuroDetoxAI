@@ -66,10 +66,10 @@ ws_manager = ConnectionManager()
 
 
 @app.websocket("/ws")
+@app.websocket("/api/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await ws_manager.connect(websocket)
     try:
-        # Send initial snapshot upon connection
         stats = store.get_stats_data()
         await websocket.send_json({
             "type": "INITIAL_STATE",
@@ -84,7 +84,6 @@ async def websocket_endpoint(websocket: WebSocket):
             }
         })
         while True:
-            # Keep connection alive
             await websocket.receive_text()
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket)
@@ -112,7 +111,6 @@ async def _ingest_and_broadcast(payload: NotificationCreate) -> Notification:
     n = scheduler.process_notification(n)
     store.add_notification(n)
 
-    # Broadcast in real-time to all connected frontend clients
     stats = store.get_stats_data()
     await ws_manager.broadcast("NOTIFICATION_ARRIVED", {
         "notification": n.model_dump(),
@@ -126,12 +124,13 @@ async def _ingest_and_broadcast(payload: NotificationCreate) -> Notification:
 # ---------------------------------------------------------------------------
 
 @app.post("/notifications", response_model=Notification, tags=["Notifications"])
+@app.post("/api/notifications", response_model=Notification, tags=["Notifications"])
 async def create_notification(payload: NotificationCreate):
-    """Ingest a new notification, score it with AI, apply scheduling, and push via WebSocket."""
     return await _ingest_and_broadcast(payload)
 
 
 @app.get("/notifications", response_model=List[Notification], tags=["Notifications"])
+@app.get("/api/notifications", response_model=List[Notification], tags=["Notifications"])
 def list_notifications(status: str = None, limit: int = 100):
     all_n = store.get_all_notifications()
     if status:
@@ -140,6 +139,7 @@ def list_notifications(status: str = None, limit: int = 100):
 
 
 @app.get("/notifications/{nid}", response_model=Notification, tags=["Notifications"])
+@app.get("/api/notifications/{nid}", response_model=Notification, tags=["Notifications"])
 def get_notification(nid: str):
     n = store.get_notification_by_id(nid)
     if not n:
@@ -148,8 +148,8 @@ def get_notification(nid: str):
 
 
 @app.post("/notifications/{nid}/action", response_model=Notification, tags=["Notifications"])
+@app.post("/api/notifications/{nid}/action", response_model=Notification, tags=["Notifications"])
 async def user_action(nid: str, payload: UserAction):
-    """Record user feedback (open/dismiss/snooze) and update AI model reinforcement weights."""
     n = store.get_notification_by_id(nid)
     if not n:
         raise HTTPException(status_code=404, detail="Notification not found")
@@ -158,7 +158,6 @@ async def user_action(nid: str, payload: UserAction):
     ai.apply_user_action(n.sender, n.category, payload.action)
     store.update_notification(n)
 
-    # Broadcast updated stats and weights
     stats = store.get_stats_data()
     await ws_manager.broadcast("ACTION_PROCESSED", {
         "notification": n.model_dump(),
@@ -169,6 +168,7 @@ async def user_action(nid: str, payload: UserAction):
 
 
 @app.delete("/notifications", tags=["Notifications"])
+@app.delete("/api/notifications", tags=["Notifications"])
 async def clear_notifications():
     store.clear_all()
     stats = store.get_stats_data()
@@ -184,11 +184,13 @@ async def clear_notifications():
 # ---------------------------------------------------------------------------
 
 @app.get("/schedule", response_model=ScheduleConfig, tags=["Schedule"])
+@app.get("/api/schedule", response_model=ScheduleConfig, tags=["Schedule"])
 def get_schedule():
     return store.get_schedule_config()
 
 
 @app.put("/schedule", response_model=ScheduleConfig, tags=["Schedule"])
+@app.put("/api/schedule", response_model=ScheduleConfig, tags=["Schedule"])
 async def update_schedule(cfg: ScheduleConfig):
     store.set_schedule_config(cfg)
     await ws_manager.broadcast("SCHEDULE_UPDATED", {"schedule": cfg.model_dump()})
@@ -196,11 +198,13 @@ async def update_schedule(cfg: ScheduleConfig):
 
 
 @app.get("/stats", response_model=StatsResponse, tags=["Stats"])
+@app.get("/api/stats", response_model=StatsResponse, tags=["Stats"])
 def get_stats():
     return store.get_stats_data()
 
 
 @app.get("/ai/weights", tags=["AI"])
+@app.get("/api/ai/weights", tags=["AI"])
 def get_weights():
     return {
         "sender_weights": store.get_sender_weights(),
@@ -229,8 +233,8 @@ SAMPLE_NOTIFICATIONS = [
 
 
 @app.post("/simulate", tags=["Simulation"])
+@app.post("/api/simulate", tags=["Simulation"])
 async def simulate_notification(count: int = 1):
-    """Generate random sample notifications and broadcast them in real time."""
     created = []
     for _ in range(min(count, 10)):
         sample = random.choice(SAMPLE_NOTIFICATIONS)
@@ -242,7 +246,6 @@ async def simulate_notification(count: int = 1):
     return created
 
 
-# Background task for live stream simulation
 _stream_task = None
 _streaming_active = False
 
@@ -257,6 +260,7 @@ async def _stream_worker():
 
 
 @app.post("/simulate/stream/toggle", tags=["Simulation"])
+@app.post("/api/simulate/stream/toggle", tags=["Simulation"])
 async def toggle_stream():
     global _stream_task, _streaming_active
     _streaming_active = not _streaming_active
@@ -272,10 +276,12 @@ async def toggle_stream():
 
 
 @app.get("/simulate/stream/status", tags=["Simulation"])
+@app.get("/api/simulate/stream/status", tags=["Simulation"])
 def stream_status():
     return {"streaming": _streaming_active}
 
 
 @app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
 def health():
     return {"status": "ok", "version": "2.0.0", "time": datetime.now().isoformat()}
