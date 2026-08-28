@@ -1,13 +1,30 @@
 import axios from "axios";
 
-// Use environment variable or default to current domain
-const API_URL = import.meta.env.VITE_API_URL || "/api";
+// API URL configuration
+// 1. If VITE_API_URL env var is set (e.g., from Vercel), use it
+// 2. Otherwise default to localhost for development
+const DEFAULT_API_URL = import.meta.env.MODE === 'development' 
+  ? "http://localhost:8000"
+  : "/api"; // For same-domain deployment
+
+const API_URL = import.meta.env.VITE_API_URL || DEFAULT_API_URL;
 const BASE = API_URL;
 
-// For WebSocket, determine protocol based on current page protocol
-const protocol = typeof window !== 'undefined' ? (window.location.protocol === 'https:' ? 'wss' : 'ws') : 'ws';
-const wsHost = typeof window !== 'undefined' ? window.location.host : 'localhost:8000';
-export const WS_URL = `${protocol}://${wsHost}/ws`;
+// WebSocket URL - handle both same-domain and external backends
+let WS_URL;
+if (API_URL.startsWith("http://") || API_URL.startsWith("https://")) {
+  // External backend (e.g., Railway)
+  const protocol = API_URL.startsWith("https") ? "wss" : "ws";
+  const wsHost = API_URL.replace(/^https?:\/\//, "");
+  WS_URL = `${protocol}://${wsHost}/ws`;
+} else {
+  // Same-domain or relative backend
+  const protocol = typeof window !== 'undefined' ? 
+    (window.location.protocol === 'https:' ? 'wss' : 'ws') : 'ws';
+  WS_URL = `${protocol}://${typeof window !== 'undefined' ? window.location.host : 'localhost:8000'}/ws`;
+}
+
+export { WS_URL };
 
 export const api = {
   // Notifications
