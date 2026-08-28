@@ -10,46 +10,14 @@
 - 🧠 **Multi-Stage Semantic NLP & Reinforcement Engine** (Sub-2ms latency, 100% offline, privacy-first).
 - 🛡️ **Autonomous Focus Shield** with smart digest batching.
 - 🔍 **Explainable AI (XAI)**: Click *"Explain AI Score"* on any alert to see exact linguistic intent and mathematical weighting.
-- 🎤 **Built-in 8-Slide Presentation Deck** directly inside the web console with speaker notes and judge Q&A defense!
 - 📱 **Architected for Native Mobile Integration** (Android `NotificationListenerService` & iOS `FocusFilters API`).
 
 ---
 
 ## 🏛️ System Architecture
 
-```mermaid
-flowchart TD
-    subgraph Ingestion ["1. Real-Time Ingestion Layer"]
-        A1[Live WebSocket Stream] --> B[FastAPI Gateway :8000]
-        A2[Custom Notification Tester] --> B
-        A3[Simulated Device Webhooks] --> B
-    end
+<img width="1472" height="2032" alt="image" src="https://github.com/user-attachments/assets/5239e45a-f06a-4142-84b0-a1392cf46ab8" />
 
-    subgraph AIEngine ["2. Multi-Stage AI & Intent Engine"]
-        B --> C[Semantic NLP Intent Classifier]
-        C --> D[Category Affinity Matrix]
-        D --> E[Adaptive Reinforcement Learner]
-        E --> F[Focus Window / DND Penalty]
-        F --> G[Explainable AI XAI Breakdown]
-    end
-
-    subgraph DecisionEngine ["3. Decision & Scheduling Engine"]
-        G --> H{Score >= 52 or Emergency Intent?}
-        H -- YES (Critical) --> I[IMMEDIATE REAL-TIME PASS]
-        H -- NO (Low/Medium) --> J{Focus Shield Active?}
-        J -- Shield ON --> K[BATCH DIGEST (DND Buffer)]
-        J -- Shield OFF --> L[NORMAL PASS]
-    end
-
-    subgraph Frontend ["4. Reactive Client Layer"]
-        I --> M[WebSocket /ws Push]
-        K --> M
-        L --> M
-        M --> N[React 18 Dashboard & Live Feed :5173]
-        N --> O[User Feedback Action: Open / Dismiss]
-        O -->|Online RL Gradient ΔW| E
-    end
-```
 
 ---
 
