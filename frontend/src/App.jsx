@@ -29,6 +29,7 @@ export default function App() {
   const [scheduleConfig, setScheduleConfig] = useState(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [wsConnected, setWsConnected] = useState(false);
+  const [backendAvailable, setBackendAvailable] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
@@ -64,60 +65,84 @@ export default function App() {
   // WebSocket Connection Management
   useEffect(() => {
     let ws;
-    const connectWS = () => {
-      ws = new WebSocket(WS_URL);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        setWsConnected(true);
-        setError(null);
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const msg = JSON.parse(event.data);
-          if (msg.type === "INITIAL_STATE") {
-            setStats(msg.data.stats);
-            setNotifications(msg.data.notifications);
-            setScheduleConfig(msg.data.schedule);
-          } else if (msg.type === "NOTIFICATION_ARRIVED") {
-            const { notification, stats } = msg.data;
-            setNotifications((prev) => [notification, ...prev.filter(n => n.id !== notification.id)]);
-            setStats(stats);
-            if (notification.priority_label === "critical") {
-              showToast("🚨 Critical Alert Passed Through", notification.title, "critical");
-            }
-          } else if (msg.type === "ACTION_PROCESSED") {
-            const { notification, stats } = msg.data;
-            setNotifications((prev) => prev.map(n => n.id === notification.id ? notification : n));
-            setStats(stats);
-          } else if (msg.type === "CLEARED_ALL") {
-            setNotifications([]);
-            setStats(msg.data.stats);
-          } else if (msg.type === "SCHEDULE_UPDATED") {
-            setScheduleConfig(msg.data.schedule);
-          } else if (msg.type === "STREAM_STATUS") {
-            setIsStreaming(msg.data.streaming);
-          }
-        } catch (err) {
-          console.error("WS Parse Error:", err);
-        }
-      };
-
-      ws.onclose = () => {
-        setWsConnected(false);
-        if (isMounted) {
-          reconnectTimer = setTimeout(connectWS, 3000);
-        }
-      };
-
-      ws.onerror = () => {
-        setWsConnected(false);
-      };
-    };
-
     let reconnectTimer;
     let isMounted = true;
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
+
+    const connectWS = () => {
+      if (retryCount >= MAX_RETRIES) {
+        console.warn("Max WebSocket reconnection attempts reached. Backend may be unavailable.");
+        setWsConnected(false);
+        setBackendAvailable(false);
+        return;
+      }
+
+      try {
+        ws = new WebSocket(WS_URL);
+        wsRef.current = ws;
+
+        ws.onopen = () => {
+          setWsConnected(true);
+          setBackendAvailable(true);
+          setError(null);
+          retryCount = 0; // Reset retry count on successful connection
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === "INITIAL_STATE") {
+              setStats(msg.data.stats);
+              setNotifications(msg.data.notifications);
+              setScheduleConfig(msg.data.schedule);
+            } else if (msg.type === "NOTIFICATION_ARRIVED") {
+              const { notification, stats } = msg.data;
+              setNotifications((prev) => [notification, ...prev.filter(n => n.id !== notification.id)]);
+              setStats(stats);
+              if (notification.priority_label === "critical") {
+                showToast("🚨 Critical Alert Passed Through", notification.title, "critical");
+              }
+            } else if (msg.type === "ACTION_PROCESSED") {
+              const { notification, stats } = msg.data;
+              setNotifications((prev) => prev.map(n => n.id === notification.id ? notification : n));
+              setStats(stats);
+            } else if (msg.type === "CLEARED_ALL") {
+              setNotifications([]);
+              setStats(msg.data.stats);
+            } else if (msg.type === "SCHEDULE_UPDATED") {
+              setScheduleConfig(msg.data.schedule);
+            } else if (msg.type === "STREAM_STATUS") {
+              setIsStreaming(msg.data.streaming);
+            }
+          } catch (err) {
+            console.error("WS Parse Error:", err);
+          }
+        };
+
+        ws.onclose = () => {
+          setWsConnected(false);
+          retryCount++;
+          if (isMounted && retryCount < MAX_RETRIES) {
+            reconnectTimer = setTimeout(connectWS, 3000);
+          } else if (retryCount >= MAX_RETRIES) {
+            setBackendAvailable(false);
+          }
+        };
+
+        ws.onerror = () => {
+          setWsConnected(false);
+        };
+      } catch (err) {
+        console.error("WebSocket connection error:", err);
+        retryCount++;
+        if (isMounted && retryCount < MAX_RETRIES) {
+          reconnectTimer = setTimeout(connectWS, 3000);
+        } else if (retryCount >= MAX_RETRIES) {
+          setBackendAvailable(false);
+        }
+      }
+    };
 
     connectWS();
     refreshAll();
@@ -229,14 +254,14 @@ export default function App() {
               fontSize: 11,
               padding: "5px 12px",
               borderRadius: 20,
-              background: wsConnected ? "rgba(16,185,129,0.12)" : "rgba(244,63,94,0.12)",
-              color: wsConnected ? "var(--low)" : "var(--critical)",
-              border: `1px solid ${wsConnected ? "rgba(16,185,129,0.3)" : "rgba(244,63,94,0.3)"}`,
+              background: wsConnected ? "rgba(16,185,129,0.12)" : backendAvailable ? "rgba(249,115,22,0.12)" : "rgba(244,63,94,0.12)",
+              color: wsConnected ? "var(--low)" : backendAvailable ? "var(--high)" : "var(--critical)",
+              border: `1px solid ${wsConnected ? "rgba(16,185,129,0.3)" : backendAvailable ? "rgba(249,115,22,0.3)" : "rgba(244,63,94,0.3)"}`,
               fontWeight: 700,
             }}
           >
             {wsConnected ? <Wifi size={12} /> : <WifiOff size={12} />}
-            {wsConnected ? "Real-Time WS Active" : "Reconnecting..."}
+            {wsConnected ? "Real-Time WS Active" : backendAvailable ? "Connecting..." : "Backend Offline"}
           </div>
 
           {/* Focus Mode Pill */}
