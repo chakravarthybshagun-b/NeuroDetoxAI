@@ -7,10 +7,11 @@ __pycache__
 .pytest_cache
 .venv
 venv
-dist
 build
 *.egg-info
 .DS_Store
 .idea
 .vscode
 *.log
+Dockerfile
+railway.json
