@@ -1,8 +1,7 @@
 # 🧠 NeuroDetox AI — Smart Cognitive Attention Shield
 > **Track / Category:** Digital Detox & Well-Being  
 > **Problem Statement ID:** 30 | SMART NOTIFICATION MANAGER  
-> **Built for:** High School & College Hackathons (Class 12 Ready)  
-> **Tagline:** An AI-powered cognitive attention shield that learns your study habits, prioritizes critical alerts, and batches distractions in real time.
+ > **Tagline:** An AI-powered cognitive attention shield that learns your study habits, prioritizes critical alerts, and batches distractions in real time.
 
 ---
 
@@ -123,7 +122,7 @@ npm run dev
 
 ---
 
-## 🎮 How to Use & Demo to Judges (3-Minute Script)
+## 🎮 How to Use  (3-Minute Script)
 
 ### Step 1: Open Home & PPT Presentation Mode
 1. Open **`http://localhost:5173`** in your browser.
