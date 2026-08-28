@@ -219,3 +219,5 @@ smart-notification-manager/
 ---
 
 Built with ❤️ for the Digital Detox AI Hackathon.
+#   N e u r o D e t o x A I  
+ 
